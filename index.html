@@ -932,6 +932,11 @@ $("#dec-in").addEventListener("input", () => {
   const out = $("#dec-out");
   if (!raw) { out.textContent = "The secret message appears here…"; return; }
   const compact = raw.replace(/[\s,]+/g, "");
+  const MISSION = "0101100101001111010101010010000001010010010011110100001101001011";
+  if (compact === MISSION) {
+    out.textContent = "🕵️ Caught you, agent! That's the First Mission — and the mission said NO pasting! Decode it by hand with the ASCII table. Here's a start: 01011001 = 64+16+8+1 = 89, and 89 is the letter… go look it up 😉";
+    return;
+  }
   let text = "";
   try {
     if (/^[01]+$/.test(compact) && compact.length >= 8) {
