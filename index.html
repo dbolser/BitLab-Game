@@ -1,0 +1,995 @@
+<title>BitLab — Learn Binary</title>
+<style>
+  :root{
+    --paper:#F1F3F8;
+    --panel:#FFFFFF;
+    --panel-2:#E7EAF3;
+    --ink:#1B2440;
+    --ink-soft:#5A6480;
+    --line:#C9CFDF;
+    --accent:#FFB020;
+    --accent-ink:#7A4E00;
+    --accent-soft:#FFF3D6;
+    --blue:#3E63DD;
+    --blue-soft:#E4EAFB;
+    --teal:#0F9285;
+    --teal-soft:#DDF3F0;
+    --good:#2E9E4F;
+    --good-soft:#E1F5E7;
+    --bad:#D84545;
+    --bad-soft:#FBE4E4;
+    --lamp-off:#D4D9E6;
+    --lamp-glow:0 0 14px rgba(255,176,32,.65), 0 0 34px rgba(255,176,32,.35);
+    --mono:ui-monospace,"Cascadia Code","JetBrains Mono",Menlo,Consolas,monospace;
+    --sans:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --paper:#0F1628;
+      --panel:#182238;
+      --panel-2:#121B2E;
+      --ink:#E8ECF6;
+      --ink-soft:#93A0BF;
+      --line:#2C3A57;
+      --accent:#FFB020;
+      --accent-ink:#FFD98A;
+      --accent-soft:#3A2E10;
+      --blue:#7C9AF2;
+      --blue-soft:#20304F;
+      --teal:#3AC2B3;
+      --teal-soft:#123A36;
+      --good:#4CC470;
+      --good-soft:#143423;
+      --bad:#F07575;
+      --bad-soft:#3D1A1A;
+      --lamp-off:#2A3550;
+    }
+  }
+  :root[data-theme="light"]{
+    --paper:#F1F3F8; --panel:#FFFFFF; --panel-2:#E7EAF3; --ink:#1B2440; --ink-soft:#5A6480;
+    --line:#C9CFDF; --accent:#FFB020; --accent-ink:#7A4E00; --accent-soft:#FFF3D6;
+    --blue:#3E63DD; --blue-soft:#E4EAFB; --teal:#0F9285; --teal-soft:#DDF3F0;
+    --good:#2E9E4F; --good-soft:#E1F5E7; --bad:#D84545; --bad-soft:#FBE4E4; --lamp-off:#D4D9E6;
+  }
+  :root[data-theme="dark"]{
+    --paper:#0F1628; --panel:#182238; --panel-2:#121B2E; --ink:#E8ECF6; --ink-soft:#93A0BF;
+    --line:#2C3A57; --accent:#FFB020; --accent-ink:#FFD98A; --accent-soft:#3A2E10;
+    --blue:#7C9AF2; --blue-soft:#20304F; --teal:#3AC2B3; --teal-soft:#123A36;
+    --good:#4CC470; --good-soft:#143423; --bad:#F07575; --bad-soft:#3D1A1A; --lamp-off:#2A3550;
+  }
+
+  *{box-sizing:border-box}
+  body{
+    margin:0; background:var(--paper); color:var(--ink);
+    font-family:var(--sans); line-height:1.55;
+    -webkit-font-smoothing:antialiased;
+  }
+  main{max-width:920px; margin:0 auto; padding:0 20px 80px}
+
+  /* ---------- header ---------- */
+  header{
+    max-width:920px; margin:0 auto; padding:28px 20px 10px;
+    display:flex; align-items:baseline; gap:14px; flex-wrap:wrap;
+  }
+  .logo{
+    font-size:30px; font-weight:900; letter-spacing:-.5px; margin:0;
+    display:flex; align-items:center; gap:10px;
+  }
+  .logo .lamp-dot{
+    width:16px; height:16px; border-radius:50%;
+    background:var(--accent); box-shadow:var(--lamp-glow);
+    display:inline-block; flex:none;
+  }
+  .tagline{color:var(--ink-soft); font-size:15px; margin:0}
+
+  /* ---------- tabs ---------- */
+  nav{
+    max-width:920px; margin:14px auto 26px; padding:0 20px;
+    display:flex; gap:8px; flex-wrap:wrap;
+  }
+  .tab{
+    border:1px solid var(--line); background:var(--panel); color:var(--ink);
+    padding:9px 16px; border-radius:999px; font-size:15px; font-weight:650;
+    cursor:pointer; font-family:var(--sans);
+  }
+  .tab:hover{border-color:var(--blue)}
+  .tab[aria-selected="true"]{
+    background:var(--blue); border-color:var(--blue); color:#fff;
+  }
+  .tab:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visible{
+    outline:3px solid var(--accent); outline-offset:2px;
+  }
+  section[hidden]{display:none}
+
+  h2{font-size:24px; font-weight:850; letter-spacing:-.3px; margin:0 0 6px; text-wrap:balance}
+  h3{font-size:17px; font-weight:750; margin:0 0 6px}
+  .lede{color:var(--ink-soft); margin:0 0 22px; max-width:62ch}
+  p{max-width:66ch}
+
+  .card{
+    background:var(--panel); border:1px solid var(--line); border-radius:16px;
+    padding:22px; margin-bottom:22px;
+  }
+  .card > p:first-child{margin-top:0}
+  .card > p:last-child{margin-bottom:0}
+
+  /* ---------- bit switch panels ---------- */
+  .bit-grid{
+    display:grid; gap:6px 10px; justify-content:center;
+    margin:14px auto; width:max-content; max-width:100%;
+  }
+  .bit-power{
+    text-align:center; font-family:var(--mono); font-size:13px;
+    color:var(--blue); font-weight:700;
+  }
+  .bit-power sup{font-size:.72em; line-height:0}
+  .bit-place{
+    text-align:center; font-family:var(--mono); font-size:15px; font-weight:700;
+    color:var(--ink-soft); font-variant-numeric:tabular-nums;
+  }
+  .bit{
+    width:58px; height:76px; border-radius:12px; cursor:pointer;
+    border:2px solid var(--line); background:var(--panel-2);
+    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px;
+    transition:background .15s, border-color .15s;
+    font-family:var(--mono); padding:0;
+  }
+  .bit .lamp{
+    width:20px; height:20px; border-radius:50%;
+    background:var(--lamp-off); transition:background .15s, box-shadow .15s;
+  }
+  .bit .val{font-size:24px; font-weight:800; color:var(--ink-soft)}
+  .bit.on{border-color:var(--accent); background:var(--accent-soft)}
+  .bit.on .lamp{background:var(--accent); box-shadow:var(--lamp-glow)}
+  .bit.on .val{color:var(--accent-ink)}
+  .bit.static{cursor:default}
+  .bit-flip{
+    text-align:center; font-size:11px; color:var(--ink-soft); line-height:1.3;
+  }
+  .nibble-gap{width:18px}
+
+  @media (max-width:620px){
+    .bit{width:40px; height:60px}
+    .bit .val{font-size:18px}
+    .bit .lamp{width:14px; height:14px}
+    .nibble-gap{width:8px}
+  }
+
+  .readout{
+    text-align:center; margin-top:16px; display:flex; gap:26px;
+    justify-content:center; flex-wrap:wrap;
+  }
+  .readout .item{min-width:90px}
+  .readout .label{
+    font-size:12px; text-transform:uppercase; letter-spacing:.09em;
+    color:var(--ink-soft); font-weight:700;
+  }
+  .readout .big{
+    font-family:var(--mono); font-size:38px; font-weight:800;
+    font-variant-numeric:tabular-nums; line-height:1.15;
+  }
+  .readout .big.hex{color:var(--teal)}
+  .readout .big.ascii{color:var(--blue)}
+  .readout .big.ascii.dim{
+    font-size:14px; font-weight:750; color:var(--ink-soft);
+    line-height:44px; letter-spacing:.05em;
+  }
+  .sum-line{
+    text-align:center; font-family:var(--mono); font-size:16px;
+    color:var(--ink-soft); margin-top:10px; min-height:1.5em;
+    font-variant-numeric:tabular-nums; overflow-x:auto; padding-bottom:2px;
+  }
+  .sum-line b{color:var(--accent-ink); font-weight:800}
+
+  /* ---------- tables ---------- */
+  .tbl-wrap{overflow-x:auto}
+  table{border-collapse:collapse; font-size:15px; margin:6px 0}
+  th,td{
+    border:1px solid var(--line); padding:7px 12px; text-align:center;
+    font-variant-numeric:tabular-nums;
+  }
+  th{background:var(--panel-2); font-size:13px}
+  td.mono, th.mono{font-family:var(--mono)}
+  .hl-accent{background:var(--accent-soft); color:var(--accent-ink); font-weight:700}
+  .hl-teal{background:var(--teal-soft); color:var(--teal); font-weight:700}
+
+  .compare-grid{display:grid; grid-template-columns:1fr 1fr; gap:18px}
+  @media (max-width:680px){.compare-grid{grid-template-columns:1fr}}
+
+  /* ---------- buttons & inputs ---------- */
+  .btn{
+    border:none; border-radius:10px; padding:10px 18px;
+    font-size:15px; font-weight:750; cursor:pointer; font-family:var(--sans);
+    background:var(--blue); color:#fff;
+  }
+  .btn.secondary{background:var(--panel-2); color:var(--ink); border:1px solid var(--line)}
+  .btn.small{padding:6px 12px; font-size:13px}
+  .btn:disabled{opacity:.45; cursor:default}
+  input[type="text"], textarea{
+    width:100%; border:1.5px solid var(--line); border-radius:10px;
+    background:var(--panel-2); color:var(--ink);
+    padding:11px 13px; font-size:16px; font-family:var(--mono);
+  }
+  textarea{resize:vertical; min-height:84px}
+  .row{display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin:10px 0}
+  .out-box{
+    font-family:var(--mono); font-size:15px; background:var(--panel-2);
+    border:1.5px dashed var(--line); border-radius:10px; padding:12px 14px;
+    min-height:52px; word-break:break-all; white-space:pre-wrap;
+    font-variant-numeric:tabular-nums;
+  }
+
+  /* ---------- counter ---------- */
+  .counter-controls{display:flex; gap:10px; align-items:center; flex-wrap:wrap; justify-content:center; margin-top:8px}
+  .speed-wrap{display:flex; gap:8px; align-items:center; font-size:14px; color:var(--ink-soft)}
+  .history{
+    font-family:var(--mono); font-size:15px; line-height:1.75; margin-top:16px;
+    background:var(--panel-2); border-radius:10px; padding:12px 16px;
+    max-height:220px; overflow-y:auto; font-variant-numeric:tabular-nums;
+  }
+  .history .h-row{display:flex; gap:18px; justify-content:center; white-space:nowrap}
+  .history .h-bin b{color:var(--accent-ink)}
+  .history .h-dec{color:var(--ink-soft); min-width:3ch; text-align:right}
+  .history .h-hex{color:var(--teal); min-width:4ch}
+
+  /* ---------- ascii ---------- */
+  .char-cards{display:flex; gap:10px; flex-wrap:wrap; margin-top:10px}
+  .char-card{
+    border:1px solid var(--line); border-radius:12px; padding:10px 14px;
+    text-align:center; background:var(--panel-2); min-width:96px;
+  }
+  .char-card .ch{font-size:26px; font-weight:800; font-family:var(--mono)}
+  .char-card .dec{color:var(--ink-soft); font-size:13px; margin-top:2px}
+  .char-card .hex{color:var(--teal); font-family:var(--mono); font-size:13px}
+  .char-card .bin{font-family:var(--mono); font-size:13px; margin-top:4px; letter-spacing:.06em}
+  .char-card .bin b{color:var(--accent-ink)}
+
+  details{margin-top:14px}
+  summary{cursor:pointer; font-weight:700; color:var(--blue)}
+  .ascii-table-grid{
+    display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr));
+    gap:6px; margin-top:12px; font-family:var(--mono); font-size:13.5px;
+  }
+  .ascii-cell{
+    border:1px solid var(--line); border-radius:8px; padding:5px 9px;
+    background:var(--panel-2); white-space:nowrap; font-variant-numeric:tabular-nums;
+  }
+  .ascii-cell b{font-size:15px}
+  .ascii-cell .c-hex{color:var(--teal)}
+
+  /* ---------- game ---------- */
+  .level-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:14px}
+  .level-card{
+    border:1.5px solid var(--line); border-radius:14px; padding:16px;
+    background:var(--panel); cursor:pointer; text-align:left; font-family:var(--sans);
+    color:var(--ink); display:flex; flex-direction:column; gap:6px;
+  }
+  .level-card:hover{border-color:var(--blue)}
+  .level-card .lv-num{
+    font-size:12px; font-weight:800; letter-spacing:.09em; text-transform:uppercase;
+    color:var(--blue);
+  }
+  .level-card .lv-name{font-size:17px; font-weight:800}
+  .level-card .lv-desc{font-size:13.5px; color:var(--ink-soft)}
+  .level-card .lv-stars{font-size:17px; letter-spacing:2px; color:var(--accent)}
+  .quiz-top{display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px}
+  .quiz-progress{font-size:14px; color:var(--ink-soft); font-weight:700}
+  .quiz-q{
+    font-family:var(--mono); font-size:34px; font-weight:800; text-align:center;
+    margin:18px 0 6px; letter-spacing:.05em; font-variant-numeric:tabular-nums;
+    overflow-x:auto; padding-bottom:2px;
+  }
+  .quiz-q .q-hex{color:var(--teal)}
+  .quiz-hint{text-align:center; color:var(--ink-soft); font-size:14px; margin-bottom:14px}
+  .quiz-input-row{display:flex; gap:10px; justify-content:center; align-items:center; flex-wrap:wrap}
+  .quiz-input-row input{width:170px; text-align:center; font-size:22px}
+  .feedback{
+    text-align:center; font-weight:800; font-size:17px; min-height:30px; margin-top:14px;
+  }
+  .feedback.good{color:var(--good)}
+  .feedback.bad{color:var(--bad)}
+  .hex-pad{display:grid; grid-template-columns:repeat(8,1fr); gap:8px; max-width:430px; margin:0 auto}
+  @media (max-width:520px){.hex-pad{grid-template-columns:repeat(4,1fr)}}
+  .hex-key{
+    font-family:var(--mono); font-size:19px; font-weight:800; padding:10px 0;
+    border:1.5px solid var(--line); border-radius:10px; background:var(--panel-2);
+    color:var(--ink); cursor:pointer;
+  }
+  .hex-key:hover{border-color:var(--teal); color:var(--teal)}
+  .result-banner{
+    text-align:center; padding:26px 10px;
+  }
+  .result-banner .stars{font-size:44px; letter-spacing:6px; color:var(--accent)}
+  .result-banner .msg{font-size:20px; font-weight:800; margin-top:6px}
+  .pill{
+    display:inline-block; background:var(--accent-soft); color:var(--accent-ink);
+    border-radius:999px; padding:3px 12px; font-size:13px; font-weight:750;
+  }
+  .tip{
+    border-left:4px solid var(--accent); background:var(--accent-soft);
+    color:var(--ink); border-radius:0 10px 10px 0;
+    padding:10px 14px; font-size:14.5px; margin:14px 0; max-width:62ch;
+  }
+  .tip b{color:var(--accent-ink)}
+  code{
+    font-family:var(--mono); background:var(--panel-2); border-radius:6px;
+    padding:1px 6px; font-size:.92em;
+  }
+
+  @media (prefers-reduced-motion: no-preference){
+    .bit .lamp{transition:background .15s, box-shadow .25s}
+    .tab, .btn, .level-card{transition:border-color .12s, background .12s}
+  }
+</style>
+
+<header>
+  <h1 class="logo"><span class="lamp-dot"></span>BitLab</h1>
+  <p class="tagline">Learn the secret language of computers</p>
+</header>
+
+<nav role="tablist" aria-label="BitLab sections">
+  <button class="tab" role="tab" data-tab="learn"   aria-selected="true">1 · Learn binary</button>
+  <button class="tab" role="tab" data-tab="counter" aria-selected="false">2 · Counter</button>
+  <button class="tab" role="tab" data-tab="hex"     aria-selected="false">3 · Hex</button>
+  <button class="tab" role="tab" data-tab="ascii"   aria-selected="false">4 · ASCII</button>
+  <button class="tab" role="tab" data-tab="secret"  aria-selected="false">5 · Secret codes</button>
+  <button class="tab" role="tab" data-tab="game"    aria-selected="false">🎮 Play</button>
+</nav>
+
+<main>
+
+<!-- ============ LEARN ============ -->
+<section id="panel-learn" role="tabpanel">
+  <h2>Bits are tiny light switches</h2>
+  <p class="lede">A computer only understands two things: <b>ON</b> and <b>OFF</b>. One switch is called a <b>bit</b>. Eight bits together make a <b>byte</b> — and a byte can store a number. Try it: click the switches!</p>
+
+  <div class="card">
+    <div id="hero-bits"></div>
+    <div class="readout">
+      <div class="item"><div class="label">Decimal</div><div class="big" id="hero-dec">0</div></div>
+      <div class="item"><div class="label">Hex</div><div class="big hex" id="hero-hex">00</div></div>
+      <div class="item"><div class="label">ASCII</div><div class="big ascii dim" id="hero-ascii" title="an invisible control character — it has a job, not a shape">NUL</div></div>
+    </div>
+    <div class="sum-line" id="hero-sum">Flip some switches to make a number…</div>
+    <div class="row" style="justify-content:center">
+      <button class="btn secondary small" id="hero-clear">Clear</button>
+      <button class="btn secondary small" id="hero-random">Random number</button>
+      <button class="btn secondary small" id="hero-minus" aria-label="Subtract one">−</button>
+      <button class="btn secondary small" id="hero-plus" aria-label="Add one">+</button>
+      <button class="btn secondary small" id="hero-max">All ON (max!)</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>It works just like decimal — but doubling instead of ×10</h3>
+    <p>You already know place-value columns from normal numbers: <b>units, tens, hundreds</b>. Each column is worth <b>10×</b> more. Binary is the same idea, but each column is worth <b>2×</b> more: <b>units, twos, fours, eights…</b></p>
+    <p>These tables show <b>your lightbulb number from above</b> — flip the switches and watch both sides follow!</p>
+    <div class="compare-grid">
+      <div>
+        <h3>Decimal — powers of 10</h3>
+        <div class="tbl-wrap"><table>
+          <tr><th class="mono">10²</th><th class="mono">10¹</th><th class="mono">10⁰</th></tr>
+          <tr><th>hundreds</th><th>tens</th><th>units</th></tr>
+          <tr class="mono" id="cmp-dec-row"><td>0</td><td>0</td><td>0</td></tr>
+        </table></div>
+        <p style="font-family:var(--mono); font-size:14.5px; overflow-x:auto" id="cmp-dec-sum">0 = <b>0</b>×100 + <b>0</b>×10 + <b>0</b>×1</p>
+      </div>
+      <div>
+        <h3>Binary — powers of 2</h3>
+        <div class="tbl-wrap"><table>
+          <tr><th class="mono">2⁷</th><th class="mono">2⁶</th><th class="mono">2⁵</th><th class="mono">2⁴</th><th class="mono">2³</th><th class="mono">2²</th><th class="mono">2¹</th><th class="mono">2⁰</th></tr>
+          <tr><th>128s</th><th>64s</th><th>32s</th><th>16s</th><th>eights</th><th>fours</th><th>twos</th><th>units</th></tr>
+          <tr class="mono" id="cmp-bin-row"><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+        </table></div>
+        <p style="font-family:var(--mono); font-size:14.5px; overflow-x:auto" id="cmp-bin-sum">00000000 = 0</p>
+      </div>
+    </div>
+    <div class="tip">💡 <b>Reading trick:</b> write the column values above the bits (128, 64, 32, 16, 8, 4, 2, 1), then just <b>add up the columns where the bit is 1</b>.</div>
+  </div>
+
+  <div class="card">
+    <h3>Powers of 2 — worth memorising!</h3>
+    <p>These numbers appear everywhere in computers (ever noticed games and phones use 256, 512, 1024…?).</p>
+    <div class="tbl-wrap"><table>
+      <tr>
+        <th class="mono">2⁰</th><th class="mono">2¹</th><th class="mono">2²</th><th class="mono">2³</th><th class="mono">2⁴</th><th class="mono">2⁵</th><th class="mono">2⁶</th><th class="mono">2⁷</th><th class="mono">2⁸</th><th class="mono">2⁹</th><th class="mono">2¹⁰</th>
+      </tr>
+      <tr class="mono">
+        <td>1</td><td>2</td><td>4</td><td>8</td><td>16</td><td>32</td><td>64</td><td>128</td><td>256</td><td>512</td><td>1024</td>
+      </tr>
+    </table></div>
+    <p>With 8 bits you can make every number from <code>0</code> (all OFF) to <code>255</code> (all ON). That's why so many computer things stop at 255!</p>
+  </div>
+</section>
+
+<!-- ============ COUNTER ============ -->
+<section id="panel-counter" role="tabpanel" hidden>
+  <h2>Watch binary count — see the pattern tick</h2>
+  <p class="lede">Press play and watch closely. The <b>units column flips every single step</b>. The twos column flips every 2 steps. The fours column every 4… Each column ticks half as fast as its neighbour. That IS binary counting.</p>
+
+  <div class="card">
+    <div id="counter-bits"></div>
+    <div class="readout">
+      <div class="item"><div class="label">Decimal</div><div class="big" id="ctr-dec">0</div></div>
+      <div class="item"><div class="label">Hex</div><div class="big hex" id="ctr-hex">00</div></div>
+    </div>
+    <div class="counter-controls">
+      <button class="btn" id="ctr-play">▶ Play</button>
+      <button class="btn secondary" id="ctr-step">+1 step</button>
+      <button class="btn secondary" id="ctr-reset">Reset</button>
+      <div class="speed-wrap">
+        <label for="ctr-speed">Speed</label>
+        <input type="range" id="ctr-speed" min="1" max="10" value="3">
+      </div>
+    </div>
+    <div class="history" id="ctr-history" aria-label="Counting history"></div>
+    <div class="tip">👀 <b>Look at the history list:</b> read one column from top to bottom. The right-hand column goes 0,1,0,1,0,1… the next goes 0,0,1,1,0,0,1,1… Every column has its own drum-beat, each twice as slow.</div>
+  </div>
+</section>
+
+<!-- ============ HEX ============ -->
+<section id="panel-hex" role="tabpanel" hidden>
+  <h2>Hexadecimal — binary's shorthand</h2>
+  <p class="lede">Binary is long to write: <code>11111111</code> is a lot of typing for 255! Programmers use <b>hexadecimal</b> (hex): counting with <b>16</b> symbols — <code>0–9</code> then <code>A B C D E F</code>. One hex digit replaces exactly <b>4 bits</b>.</p>
+
+  <div class="card">
+    <h3>Split a byte in half → two hex digits</h3>
+    <p>Flip the switches. Each group of 4 bits (a <b>nibble</b>) becomes one hex digit.</p>
+    <div id="hex-bits"></div>
+    <div class="readout">
+      <div class="item"><div class="label">Left nibble</div><div class="big hex" id="hex-hi">0</div></div>
+      <div class="item"><div class="label">Right nibble</div><div class="big hex" id="hex-lo">0</div></div>
+      <div class="item"><div class="label">Hex</div><div class="big hex" id="hex-full">0x00</div></div>
+      <div class="item"><div class="label">Decimal</div><div class="big" id="hex-dec">0</div></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>The lookup table — 0 to 15</h3>
+    <div class="tbl-wrap"><table>
+      <tr><th>Decimal</th><td class="mono">0</td><td class="mono">1</td><td class="mono">2</td><td class="mono">3</td><td class="mono">4</td><td class="mono">5</td><td class="mono">6</td><td class="mono">7</td><td class="mono">8</td><td class="mono">9</td><td class="mono">10</td><td class="mono">11</td><td class="mono">12</td><td class="mono">13</td><td class="mono">14</td><td class="mono">15</td></tr>
+      <tr><th>Binary</th><td class="mono">0000</td><td class="mono">0001</td><td class="mono">0010</td><td class="mono">0011</td><td class="mono">0100</td><td class="mono">0101</td><td class="mono">0110</td><td class="mono">0111</td><td class="mono">1000</td><td class="mono">1001</td><td class="mono">1010</td><td class="mono">1011</td><td class="mono">1100</td><td class="mono">1101</td><td class="mono">1110</td><td class="mono">1111</td></tr>
+      <tr><th>Hex</th><td class="mono hl-teal">0</td><td class="mono hl-teal">1</td><td class="mono hl-teal">2</td><td class="mono hl-teal">3</td><td class="mono hl-teal">4</td><td class="mono hl-teal">5</td><td class="mono hl-teal">6</td><td class="mono hl-teal">7</td><td class="mono hl-teal">8</td><td class="mono hl-teal">9</td><td class="mono hl-teal">A</td><td class="mono hl-teal">B</td><td class="mono hl-teal">C</td><td class="mono hl-teal">D</td><td class="mono hl-teal">E</td><td class="mono hl-teal">F</td></tr>
+    </table></div>
+    <div class="tip">💡 Hex numbers are often written with <b><code>0x</code></b> in front, like <code>0xFF</code> = 255. You've seen hex before: colour codes like <code>#FF8800</code> are three hex bytes — red, green, blue!</div>
+  </div>
+</section>
+
+<!-- ============ ASCII ============ -->
+<section id="panel-ascii" role="tabpanel" hidden>
+  <h2>ASCII — how letters become numbers</h2>
+  <p class="lede">Computers can only store numbers. So long ago, everyone agreed on a code: <b>A&nbsp;=&nbsp;65, B&nbsp;=&nbsp;66, C&nbsp;=&nbsp;67…</b> and small letters <b>a&nbsp;=&nbsp;97</b> onwards. That agreement is called <b>ASCII</b>. Every letter is one byte.</p>
+
+  <div class="card">
+    <h3>Type something — watch it turn into bytes</h3>
+    <input type="text" id="ascii-in" maxlength="12" placeholder="Type here… try your name!" aria-label="Text to translate">
+    <div class="char-cards" id="ascii-cards"></div>
+    <details>
+      <summary>Show the full ASCII letter table</summary>
+      <div class="ascii-table-grid" id="ascii-table"></div>
+    </details>
+    <div class="tip">🔎 <b>Spot the pattern:</b> capital <code>A</code> is <code>01000001</code> and small <code>a</code> is <code>01100001</code>. Only <b>one bit</b> is different (the 32s column)! That single bit is the difference between BIG and small letters.</div>
+  </div>
+</section>
+
+<!-- ============ SECRET ============ -->
+<section id="panel-secret" role="tabpanel" hidden>
+  <h2>Secret code machine</h2>
+  <p class="lede">Now you know the whole chain: <b>letter → ASCII number → binary</b>. That means you can write messages nobody else can read — unless they know binary too. Send one to a friend and teach them to decode it!</p>
+
+  <div class="card">
+    <h3>🔒 Encode a message</h3>
+    <textarea id="enc-in" maxlength="200" placeholder="Write your secret message…"></textarea>
+    <div class="row">
+      <label><input type="radio" name="enc-mode" value="bin" checked> Binary</label>
+      <label><input type="radio" name="enc-mode" value="hex"> Hex</label>
+      <button class="btn small" id="enc-copy">Copy code</button>
+      <span id="enc-copied" style="color:var(--good); font-weight:700; font-size:14px"></span>
+    </div>
+    <div class="out-box" id="enc-out">Your coded message appears here…</div>
+  </div>
+
+  <div class="card">
+    <h3>🔓 Decode a message</h3>
+    <p style="font-size:14.5px; color:var(--ink-soft)">Paste binary (groups of 8) or hex (pairs) — spaces optional. It auto-detects which one it is.</p>
+    <textarea id="dec-in" placeholder="01001000 01001001  …or…  48 49"></textarea>
+    <div class="out-box" id="dec-out">The secret message appears here…</div>
+  </div>
+
+  <div class="card">
+    <h3>🕵️ First mission</h3>
+    <p>Decode this message by hand with the ASCII table (no pasting — that's cheating!):</p>
+    <div class="out-box">01011001 01001111 01010101 00100000 01010010 01001111 01000011 01001011</div>
+  </div>
+</section>
+
+<!-- ============ GAME ============ -->
+<section id="panel-game" role="tabpanel" hidden>
+  <h2>Play — test your skills</h2>
+  <p class="lede">Four levels, eight questions each. Answer everything first-try for ★★★. Your stars are saved.</p>
+  <div id="level-select" class="level-grid"></div>
+  <div id="quiz-area" class="card" hidden></div>
+</section>
+
+</main>
+
+<script>
+"use strict";
+const $ = s => document.querySelector(s);
+const toBin = (n, w=8) => n.toString(2).padStart(w, "0");
+const toHex = (n, w=2) => n.toString(16).toUpperCase().padStart(w, "0");
+const rnd = n => Math.floor(Math.random() * n);
+
+/* ---------- tabs ---------- */
+document.querySelectorAll(".tab").forEach(tab => {
+  tab.addEventListener("click", () => {
+    document.querySelectorAll(".tab").forEach(t => t.setAttribute("aria-selected", t === tab));
+    document.querySelectorAll("main > section").forEach(s => s.hidden = true);
+    $("#panel-" + tab.dataset.tab).hidden = false;
+    if (tab.dataset.tab !== "counter") counterPause();
+  });
+});
+
+/* ---------- bit switch row builder ---------- */
+function makeBitRow(host, count, onChange, opts = {}) {
+  const bits = Array(count).fill(0);
+  const grid = document.createElement("div");
+  grid.className = "bit-grid";
+  const nibbles = opts.nibbleGap && count === 8;
+  const cols = [];
+  for (let i = 0; i < count; i++) {
+    cols.push("auto");
+    if (nibbles && i === 3) cols.push("18px");
+  }
+  grid.style.gridTemplateColumns = cols.join(" ");
+
+  const addRow = (cls, make) => {
+    for (let i = 0; i < count; i++) {
+      const el = make(i);
+      el.classList.add(cls);
+      grid.appendChild(el);
+      if (nibbles && i === 3) {
+        const gap = document.createElement("div");
+        gap.className = "nibble-gap";
+        grid.appendChild(gap);
+      }
+    }
+  };
+
+  addRow("bit-power", i => {
+    const d = document.createElement("div");
+    d.innerHTML = `2<sup>${count - 1 - i}</sup>`;
+    return d;
+  });
+  addRow("bit-place", i => {
+    const d = document.createElement("div");
+    d.textContent = 2 ** (count - 1 - i);
+    return d;
+  });
+
+  const btns = [];
+  addRow("bit-cell", i => {
+    const place = 2 ** (count - 1 - i);
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = "bit" + (opts.static ? " static" : "");
+    b.setAttribute("aria-label", `${place}s column bit`);
+    b.setAttribute("aria-pressed", "false");
+    b.innerHTML = `<span class="lamp"></span><span class="val">0</span>`;
+    if (!opts.static) {
+      b.addEventListener("click", () => {
+        bits[i] ^= 1;
+        paint(i);
+        onChange && onChange(api);
+      });
+    }
+    btns.push(b);
+    return b;
+  });
+
+  if (opts.flipLabels) {
+    addRow("bit-flip", i => {
+      const d = document.createElement("div");
+      const every = 2 ** (count - 1 - i);
+      d.textContent = every === 1 ? "flips every step" : `flips every ${every}`;
+      return d;
+    });
+  }
+
+  host.appendChild(grid);
+
+  function paint(i) {
+    btns[i].classList.toggle("on", bits[i] === 1);
+    btns[i].querySelector(".val").textContent = bits[i];
+    btns[i].setAttribute("aria-pressed", String(bits[i] === 1));
+  }
+  const api = {
+    bits,
+    value: () => bits.reduce((a, b) => a * 2 + b, 0),
+    set(n) {
+      const s = toBin(n & (2 ** count - 1), count);
+      for (let i = 0; i < count; i++) { bits[i] = +s[i]; paint(i); }
+      onChange && onChange(api);
+    }
+  };
+  return api;
+}
+
+function sumLineHTML(bits) {
+  const n = bits.length;
+  const parts = bits.map((b, i) => b ? `<b>${2 ** (n - 1 - i)}</b>` : null).filter(Boolean);
+  if (!parts.length) return "all switches OFF = 0";
+  const total = bits.reduce((a, b) => a * 2 + b, 0);
+  return parts.length === 1 ? `${parts[0]} = ${total}` : `${parts.join(" + ")} = ${total}`;
+}
+
+/* ---------- LEARN hero ---------- */
+const CTRL_NAMES = {0:"NUL",7:"BEL",8:"BS",9:"TAB",10:"LF",13:"CR",27:"ESC",127:"DEL"};
+function asciiInfo(v) {
+  if (v === 32) return { text: "␣", dim: false, title: "space" };
+  if (v >= 33 && v <= 126) return { text: String.fromCharCode(v), dim: false, title: "" };
+  if (v <= 31 || v === 127) {
+    const name = CTRL_NAMES[v] || "CTRL";
+    return { text: name, dim: true, title: "an invisible control character — it has a job, not a shape" };
+  }
+  return { text: "not ASCII", dim: true, title: "ASCII only goes up to 127 — every ASCII character has the 128s bit OFF" };
+}
+const cmpDecCells = document.querySelectorAll("#cmp-dec-row td");
+const cmpBinCells = document.querySelectorAll("#cmp-bin-row td");
+function updateCompare(v, bits) {
+  const digits = [Math.floor(v / 100), Math.floor(v / 10) % 10, v % 10];
+  digits.forEach((d, i) => {
+    cmpDecCells[i].textContent = d;
+    cmpDecCells[i].classList.toggle("hl-accent", d > 0);
+  });
+  $("#cmp-dec-sum").innerHTML =
+    `${v} = ` + [100, 10, 1].map((p, i) => `<b>${digits[i]}</b>×${p}`).join(" + ");
+  bits.forEach((b, i) => {
+    cmpBinCells[i].textContent = b;
+    cmpBinCells[i].classList.toggle("hl-accent", b === 1);
+  });
+  $("#cmp-bin-sum").innerHTML =
+    `${toBin(v)} = ` + bits.map((b, i) => `<b>${b}</b>×${2 ** (7 - i)}`).join(" + ") + ` = ${v}`;
+}
+const hero = makeBitRow($("#hero-bits"), 8, api => {
+  const v = api.value();
+  $("#hero-dec").textContent = v;
+  $("#hero-hex").textContent = toHex(v);
+  const a = asciiInfo(v);
+  const ael = $("#hero-ascii");
+  ael.textContent = a.text;
+  ael.title = a.title;
+  ael.classList.toggle("dim", a.dim);
+  $("#hero-sum").innerHTML = sumLineHTML(api.bits);
+  updateCompare(v, api.bits);
+}, { nibbleGap: false });
+$("#hero-clear").addEventListener("click", () => hero.set(0));
+$("#hero-random").addEventListener("click", () => hero.set(1 + rnd(255)));
+$("#hero-minus").addEventListener("click", () => hero.set((hero.value() + 255) & 255));
+$("#hero-plus").addEventListener("click", () => hero.set((hero.value() + 1) & 255));
+$("#hero-max").addEventListener("click", () => hero.set(255));
+hero.set(0);
+
+/* ---------- COUNTER ---------- */
+const ctr = makeBitRow($("#counter-bits"), 8, null, { static: true, flipLabels: true });
+let ctrN = 0, ctrTimer = null;
+const histEl = $("#ctr-history");
+function counterPaint() {
+  ctr.set(ctrN);
+  $("#ctr-dec").textContent = ctrN;
+  $("#ctr-hex").textContent = toHex(ctrN);
+}
+function counterTick() {
+  ctrN = (ctrN + 1) & 255;
+  counterPaint();
+  const row = document.createElement("div");
+  row.className = "h-row";
+  const bin = toBin(ctrN).replace(/1/g, "<b>1</b>");
+  row.innerHTML = `<span class="h-bin">${bin}</span><span class="h-dec">${ctrN}</span><span class="h-hex">0x${toHex(ctrN)}</span>`;
+  histEl.appendChild(row);
+  while (histEl.children.length > 64) histEl.removeChild(histEl.firstChild);
+  histEl.scrollTop = histEl.scrollHeight;
+}
+function counterDelay() { return 1100 - $("#ctr-speed").value * 100; }
+function counterPlay() {
+  if (ctrTimer) return;
+  ctrTimer = setInterval(counterTick, counterDelay());
+  $("#ctr-play").textContent = "⏸ Pause";
+}
+function counterPause() {
+  clearInterval(ctrTimer); ctrTimer = null;
+  const b = $("#ctr-play"); if (b) b.textContent = "▶ Play";
+}
+$("#ctr-play").addEventListener("click", () => ctrTimer ? counterPause() : counterPlay());
+$("#ctr-step").addEventListener("click", () => { counterPause(); counterTick(); });
+$("#ctr-reset").addEventListener("click", () => { counterPause(); ctrN = 0; counterPaint(); histEl.innerHTML = ""; });
+$("#ctr-speed").addEventListener("input", () => { if (ctrTimer) { clearInterval(ctrTimer); ctrTimer = setInterval(counterTick, counterDelay()); } });
+counterPaint();
+
+/* ---------- HEX playground ---------- */
+const hexRow = makeBitRow($("#hex-bits"), 8, api => {
+  const v = api.value();
+  $("#hex-hi").textContent = toHex(v >> 4, 1);
+  $("#hex-lo").textContent = toHex(v & 15, 1);
+  $("#hex-full").textContent = "0x" + toHex(v);
+  $("#hex-dec").textContent = v;
+}, { nibbleGap: true });
+hexRow.set(0xA7);
+
+/* ---------- ASCII ---------- */
+function binMarked(code) {
+  return toBin(code).replace(/1/g, "<b>1</b>");
+}
+function renderAsciiCards() {
+  const txt = $("#ascii-in").value;
+  const host = $("#ascii-cards");
+  host.innerHTML = "";
+  for (const ch of txt) {
+    const code = ch.codePointAt(0);
+    if (code > 127) continue;
+    const card = document.createElement("div");
+    card.className = "char-card";
+    const disp = ch === " " ? "␣" : ch;
+    card.innerHTML =
+      `<div class="ch">${disp}</div>` +
+      `<div class="dec">dec ${code} · <span class="hex">0x${toHex(code)}</span></div>` +
+      `<div class="bin">${binMarked(code)}</div>`;
+    host.appendChild(card);
+  }
+}
+$("#ascii-in").addEventListener("input", renderAsciiCards);
+$("#ascii-in").value = "Hi!";
+renderAsciiCards();
+
+(function buildAsciiTable() {
+  const host = $("#ascii-table");
+  const rows = [];
+  for (let c = 65; c <= 90; c++) rows.push(c);
+  for (let c = 97; c <= 122; c++) rows.push(c);
+  for (let c = 48; c <= 57; c++) rows.push(c);
+  rows.push(32, 33, 63, 46, 44);
+  for (const c of rows) {
+    const cell = document.createElement("div");
+    cell.className = "ascii-cell";
+    const ch = c === 32 ? "␣ space" : String.fromCharCode(c);
+    cell.innerHTML = `<b>${ch}</b> ${c} <span class="c-hex">0x${toHex(c)}</span> ${toBin(c)}`;
+    host.appendChild(cell);
+  }
+})();
+
+/* ---------- SECRET codes ---------- */
+function encMode() { return document.querySelector('input[name="enc-mode"]:checked').value; }
+function renderEncode() {
+  const txt = $("#enc-in").value;
+  const out = $("#enc-out");
+  if (!txt) { out.textContent = "Your coded message appears here…"; return; }
+  const codes = [...txt].map(ch => ch.codePointAt(0)).filter(c => c <= 127);
+  out.textContent = encMode() === "bin"
+    ? codes.map(c => toBin(c)).join(" ")
+    : codes.map(c => toHex(c)).join(" ");
+}
+$("#enc-in").addEventListener("input", renderEncode);
+document.querySelectorAll('input[name="enc-mode"]').forEach(r => r.addEventListener("change", renderEncode));
+$("#enc-copy").addEventListener("click", async () => {
+  const t = $("#enc-out").textContent;
+  try {
+    await navigator.clipboard.writeText(t);
+    $("#enc-copied").textContent = "Copied!";
+  } catch {
+    $("#enc-copied").textContent = "Select & copy by hand";
+  }
+  setTimeout(() => $("#enc-copied").textContent = "", 1800);
+});
+
+$("#dec-in").addEventListener("input", () => {
+  const raw = $("#dec-in").value.trim();
+  const out = $("#dec-out");
+  if (!raw) { out.textContent = "The secret message appears here…"; return; }
+  const compact = raw.replace(/[\s,]+/g, "");
+  let text = "";
+  try {
+    if (/^[01]+$/.test(compact) && compact.length >= 8) {
+      for (let i = 0; i + 8 <= compact.length; i += 8)
+        text += String.fromCharCode(parseInt(compact.slice(i, i + 8), 2));
+    } else if (/^[0-9a-fA-F]+$/.test(compact) && compact.length >= 2) {
+      for (let i = 0; i + 2 <= compact.length; i += 2)
+        text += String.fromCharCode(parseInt(compact.slice(i, i + 2), 16));
+    } else {
+      out.textContent = "Hmm — that doesn't look like binary or hex yet. Binary needs only 0s and 1s (8 per letter); hex uses 0–9 and A–F (2 per letter).";
+      return;
+    }
+    out.textContent = "🔓 " + text;
+  } catch {
+    out.textContent = "Something went wrong decoding that — check the groups.";
+  }
+});
+
+/* ---------- GAME ---------- */
+const WORDS = ["BIT","CODE","GAME","ROBOT","NINJA","PIZZA","MAGIC","HELLO","POWER","BYTE","LASER","SPY"];
+const LEVELS = [
+  { name: "Read the lights", desc: "Binary → decimal. Add up the ON columns.", n: 8 },
+  { name: "Make the number", desc: "Decimal → binary. Flip switches to hit the target.", n: 8 },
+  { name: "Hex detective", desc: "Match 4 bits to their hex digit.", n: 8 },
+  { name: "Word decoder", desc: "Turn ASCII bytes back into a secret word.", n: 5 },
+];
+
+let progress = {};
+try { progress = JSON.parse(localStorage.getItem("bitlab-stars") || "{}"); } catch {}
+function saveStars(lv, stars) {
+  progress[lv] = Math.max(progress[lv] || 0, stars);
+  try { localStorage.setItem("bitlab-stars", JSON.stringify(progress)); } catch {}
+}
+
+function renderLevelSelect() {
+  const host = $("#level-select");
+  host.innerHTML = "";
+  LEVELS.forEach((lv, i) => {
+    const stars = progress[i] || 0;
+    const btn = document.createElement("button");
+    btn.className = "level-card";
+    btn.innerHTML =
+      `<span class="lv-num">Level ${i + 1}</span>` +
+      `<span class="lv-name">${lv.name}</span>` +
+      `<span class="lv-desc">${lv.desc}</span>` +
+      `<span class="lv-stars">${"★".repeat(stars)}${"☆".repeat(3 - stars)}</span>`;
+    btn.addEventListener("click", () => startLevel(i));
+    host.appendChild(btn);
+  });
+}
+renderLevelSelect();
+
+const quiz = { level: 0, q: 0, mistakes: 0, firstTryWrong: false, current: null };
+const area = $("#quiz-area");
+
+function startLevel(i) {
+  quiz.level = i; quiz.q = 0; quiz.mistakes = 0;
+  $("#level-select").hidden = true;
+  area.hidden = false;
+  nextQuestion();
+}
+function endLevel() {
+  const total = LEVELS[quiz.level].n;
+  const stars = quiz.mistakes === 0 ? 3 : quiz.mistakes <= 2 ? 2 : 1;
+  saveStars(quiz.level, stars);
+  area.innerHTML =
+    `<div class="result-banner">` +
+    `<div class="stars">${"★".repeat(stars)}${"☆".repeat(3 - stars)}</div>` +
+    `<div class="msg">${stars === 3 ? "Perfect! You're a binary master!" : stars === 2 ? "Great job — almost perfect!" : "Level complete — play again for more stars!"}</div>` +
+    `<p style="color:var(--ink-soft)">${total} questions · ${quiz.mistakes} wrong ${quiz.mistakes === 1 ? "answer" : "answers"}</p>` +
+    `<div class="row" style="justify-content:center">` +
+    `<button class="btn" id="q-retry">Play again</button>` +
+    `<button class="btn secondary" id="q-back">All levels</button>` +
+    `</div></div>`;
+  $("#q-retry").addEventListener("click", () => startLevel(quiz.level));
+  $("#q-back").addEventListener("click", backToLevels);
+  renderLevelSelect();
+}
+function backToLevels() {
+  area.hidden = true;
+  $("#level-select").hidden = false;
+  renderLevelSelect();
+}
+
+function quizShell(innerHTML) {
+  const lv = LEVELS[quiz.level];
+  area.innerHTML =
+    `<div class="quiz-top">` +
+    `<span class="pill">Level ${quiz.level + 1} · ${lv.name}</span>` +
+    `<span class="quiz-progress">Question ${quiz.q + 1} / ${lv.n}</span>` +
+    `<button class="btn secondary small" id="q-quit">Quit</button>` +
+    `</div>` + innerHTML +
+    `<div class="feedback" id="q-fb"></div>`;
+  $("#q-quit").addEventListener("click", backToLevels);
+}
+function feedback(ok, msg) {
+  const fb = $("#q-fb");
+  fb.className = "feedback " + (ok ? "good" : "bad");
+  fb.textContent = msg;
+}
+function advanceAfter(ms = 900) {
+  setTimeout(() => { quiz.q++; quiz.q >= LEVELS[quiz.level].n ? endLevel() : nextQuestion(); }, ms);
+}
+function handleAnswer(ok, correctText) {
+  if (ok) {
+    feedback(true, quiz.firstTryWrong ? "Correct! ✔" : "Perfect — first try! ✔");
+    advanceAfter();
+  } else {
+    if (!quiz.firstTryWrong) { quiz.firstTryWrong = true; quiz.mistakes++; }
+    feedback(false, "Not yet — " + correctText);
+  }
+}
+
+function nextQuestion() {
+  quiz.firstTryWrong = false;
+  const gen = [qBinToDec, qDecToBin, qHex, qWord][quiz.level];
+  gen();
+}
+
+/* Level 1: binary -> decimal */
+function qBinToDec() {
+  const easy = quiz.q < 3;
+  const width = easy ? 4 : 8;
+  const n = 1 + rnd(2 ** width - 1);
+  quizShell(
+    `<p class="quiz-hint">Column values${easy ? ": 8 · 4 · 2 · 1" : ": 128 · 64 · 32 · 16 · 8 · 4 · 2 · 1"} — add the columns with a 1.</p>` +
+    `<div class="quiz-q">${toBin(n, width)}</div>` +
+    `<div class="quiz-input-row">` +
+    `<input type="text" id="q-in" inputmode="numeric" autocomplete="off" placeholder="decimal" aria-label="Your answer in decimal">` +
+    `<button class="btn" id="q-go">Check</button></div>`
+  );
+  const check = () => handleAnswer(parseInt($("#q-in").value, 10) === n, "add up the ON columns and try again.");
+  $("#q-go").addEventListener("click", check);
+  $("#q-in").addEventListener("keydown", e => e.key === "Enter" && check());
+  $("#q-in").focus();
+}
+
+/* Level 2: decimal -> binary via switches */
+function qDecToBin() {
+  const easy = quiz.q < 3;
+  const width = easy ? 4 : 8;
+  const n = 1 + rnd(2 ** width - 1);
+  quizShell(
+    `<div class="quiz-q">Make <b>${n}</b></div>` +
+    `<p class="quiz-hint">Flip switches so the columns add up to ${n}. Tip: start from the biggest column that fits.</p>` +
+    `<div id="q-bits"></div>` +
+    `<div class="quiz-input-row"><button class="btn" id="q-go">Check</button></div>`
+  );
+  const row = makeBitRow($("#q-bits"), width, null, {});
+  $("#q-go").addEventListener("click", () => {
+    const v = row.value();
+    handleAnswer(v === n, `your switches make ${v}. You need ${n}.`);
+  });
+}
+
+/* Level 3: hex */
+function qHex() {
+  const v = rnd(16);
+  const toHexDir = quiz.q % 2 === 0;
+  if (toHexDir) {
+    quizShell(
+      `<p class="quiz-hint">4 bits = 1 hex digit. Columns: 8 · 4 · 2 · 1, and 10=A, 11=B, 12=C, 13=D, 14=E, 15=F.</p>` +
+      `<div class="quiz-q">${toBin(v, 4)} = <span class="q-hex">?</span></div>` +
+      `<div class="hex-pad" id="q-pad"></div>`
+    );
+    const pad = $("#q-pad");
+    for (let i = 0; i < 16; i++) {
+      const k = document.createElement("button");
+      k.className = "hex-key";
+      k.textContent = toHex(i, 1);
+      k.addEventListener("click", () => handleAnswer(i === v, `${toHex(i,1)} is ${i} in decimal — count the columns again.`));
+      pad.appendChild(k);
+    }
+  } else {
+    quizShell(
+      `<div class="quiz-q"><span class="q-hex">${toHex(v, 1)}</span> = ?</div>` +
+      `<p class="quiz-hint">Flip the 4 switches to match this hex digit.</p>` +
+      `<div id="q-bits"></div>` +
+      `<div class="quiz-input-row"><button class="btn" id="q-go">Check</button></div>`
+    );
+    const row = makeBitRow($("#q-bits"), 4, null, {});
+    $("#q-go").addEventListener("click", () => {
+      handleAnswer(row.value() === v, `your switches make ${toHex(row.value(),1)} (${row.value()}). Hex ${toHex(v,1)} means ${v}.`);
+    });
+  }
+}
+
+/* Level 4: ASCII word decode */
+function qWord() {
+  const word = WORDS[rnd(WORDS.length)];
+  const bytes = [...word].map(c => toBin(c.charCodeAt(0))).join("  ");
+  quizShell(
+    `<p class="quiz-hint">Each group of 8 bits is one capital letter (A=65, B=66 … Z=90). Peek at the ASCII tab if stuck!</p>` +
+    `<div class="quiz-q" style="font-size:20px">${bytes}</div>` +
+    `<div class="quiz-input-row">` +
+    `<input type="text" id="q-in" autocomplete="off" autocapitalize="characters" placeholder="the word" aria-label="Decoded word">` +
+    `<button class="btn" id="q-go">Check</button></div>`
+  );
+  const check = () => handleAnswer(
+    $("#q-in").value.trim().toUpperCase() === word,
+    "decode each byte to a number first, then find its letter."
+  );
+  $("#q-go").addEventListener("click", check);
+  $("#q-in").addEventListener("keydown", e => e.key === "Enter" && check());
+  $("#q-in").focus();
+}
+</script>
