@@ -204,6 +204,12 @@
     background:var(--blue); color:#fff;
   }
   .btn.secondary{background:var(--panel-2); color:var(--ink); border:1px solid var(--line)}
+  .btn.ghost{
+    background:none; border:1px dashed var(--line); color:var(--ink-soft); font-weight:600;
+  }
+  .btn.ghost:hover{border-color:var(--teal); color:var(--teal)}
+  .hex-extra{display:none}
+  #panel-learn.show-hex .hex-extra{display:block}
   .btn.small{padding:6px 12px; font-size:13px}
   .btn:disabled{opacity:.45; cursor:default}
   input[type="text"], textarea{
@@ -363,7 +369,7 @@
     <div id="hero-bits"></div>
     <div class="readout">
       <div class="item"><div class="label">Decimal</div><div class="big" id="hero-dec">0</div></div>
-      <div class="item"><div class="label">Hex</div><div class="big hex" id="hero-hex">00</div></div>
+      <div class="item hex-extra"><div class="label">Hex</div><div class="big hex" id="hero-hex">00</div></div>
       <div class="item"><div class="label">ASCII</div><div class="big ascii dim" id="hero-ascii" title="an invisible control character — it has a job, not a shape">NUL</div></div>
     </div>
     <div class="sum-line" id="hero-sum">Flip some switches to make a number…</div>
@@ -373,6 +379,7 @@
       <button class="btn secondary small" id="hero-minus" aria-label="Subtract one">−</button>
       <button class="btn secondary small" id="hero-plus" aria-label="Add one">+</button>
       <button class="btn secondary small" id="hero-max">All ON (max!)</button>
+      <button class="btn ghost small" id="hex-toggle">show hex</button>
     </div>
   </div>
 
@@ -399,7 +406,7 @@
         </table></div>
         <p style="font-family:var(--mono); font-size:14.5px; overflow-x:auto" id="cmp-bin-sum">00000000 = 0</p>
       </div>
-      <div style="grid-column:1/-1">
+      <div style="grid-column:1/-1" class="hex-extra">
         <h3>Hex — powers of 16</h3>
         <p style="font-size:14.5px">Same trick a third time — each column is worth <b>16×</b> more. A whole byte fits in just two hex digits!</p>
         <div class="tbl-wrap"><table>
@@ -474,11 +481,10 @@
 
   <div class="card">
     <h3>The lookup table — 0 to 15</h3>
-    <div class="tbl-wrap"><table>
-      <tr><th>Decimal</th><td class="mono">0</td><td class="mono">1</td><td class="mono">2</td><td class="mono">3</td><td class="mono">4</td><td class="mono">5</td><td class="mono">6</td><td class="mono">7</td><td class="mono">8</td><td class="mono">9</td><td class="mono">10</td><td class="mono">11</td><td class="mono">12</td><td class="mono">13</td><td class="mono">14</td><td class="mono">15</td></tr>
-      <tr><th>Binary</th><td class="mono">0000</td><td class="mono">0001</td><td class="mono">0010</td><td class="mono">0011</td><td class="mono">0100</td><td class="mono">0101</td><td class="mono">0110</td><td class="mono">0111</td><td class="mono">1000</td><td class="mono">1001</td><td class="mono">1010</td><td class="mono">1011</td><td class="mono">1100</td><td class="mono">1101</td><td class="mono">1110</td><td class="mono">1111</td></tr>
-      <tr><th>Hex</th><td class="mono hl-teal">0</td><td class="mono hl-teal">1</td><td class="mono hl-teal">2</td><td class="mono hl-teal">3</td><td class="mono hl-teal">4</td><td class="mono hl-teal">5</td><td class="mono hl-teal">6</td><td class="mono hl-teal">7</td><td class="mono hl-teal">8</td><td class="mono hl-teal">9</td><td class="mono hl-teal">A</td><td class="mono hl-teal">B</td><td class="mono hl-teal">C</td><td class="mono hl-teal">D</td><td class="mono hl-teal">E</td><td class="mono hl-teal">F</td></tr>
-    </table></div>
+    <div class="row" style="align-items:flex-start; gap:22px">
+      <div class="tbl-wrap"><table id="hex-lookup-a"></table></div>
+      <div class="tbl-wrap"><table id="hex-lookup-b"></table></div>
+    </div>
     <div class="tip">💡 Hex numbers are often written with <b><code>0x</code></b> in front, like <code>0xFF</code> = 255. You've seen hex before: colour codes like <code>#FF8800</code> are three hex bytes — red, green, blue!</div>
   </div>
   <div class="next-row"><button class="btn" data-goto="ascii">Next: 4 · ASCII →</button></div>
@@ -491,7 +497,7 @@
 
   <div class="card">
     <h3>Type something — watch it turn into bytes</h3>
-    <input type="text" id="ascii-in" maxlength="12" placeholder="Type here… try your name!" aria-label="Text to translate">
+    <input type="text" id="ascii-in" maxlength="255" placeholder="Type here… try your name!" aria-label="Text to translate">
     <div class="char-cards" id="ascii-cards"></div>
     <details>
       <summary>Show the full ASCII letter table</summary>
@@ -717,6 +723,21 @@ $("#hero-plus").addEventListener("click", () => hero.set((hero.value() + 1) & 25
 $("#hero-max").addEventListener("click", () => hero.set(255));
 hero.set(0);
 
+/* ---------- hex show/hide on Learn tab ---------- */
+const hexToggle = $("#hex-toggle");
+function applyHexPref(on) {
+  $("#panel-learn").classList.toggle("show-hex", on);
+  hexToggle.textContent = on ? "hide hex" : "show hex";
+}
+let showHex = false;
+try { showHex = localStorage.getItem("bitlab-showhex") === "1"; } catch {}
+applyHexPref(showHex);
+hexToggle.addEventListener("click", () => {
+  showHex = !showHex;
+  applyHexPref(showHex);
+  try { localStorage.setItem("bitlab-showhex", showHex ? "1" : "0"); } catch {}
+});
+
 /* ---------- powers-of-2 hover popup ---------- */
 (function powersPopup() {
   const table = $("#pow2-table");
@@ -811,6 +832,17 @@ const hexRow = makeBitRow($("#hex-bits"), 8, api => {
   $("#hex-dec").textContent = v;
 }, { nibbleGap: true });
 hexRow.set(0xA7);
+
+(function buildHexLookup() {
+  const mk = (host, from, to) => {
+    let html = "<tr><th>Decimal</th><th>Binary</th><th>Hex</th></tr>";
+    for (let n = from; n <= to; n++)
+      html += `<tr><td class="mono">${n}</td><td class="mono">${toBin(n, 4)}</td><td class="mono hl-teal">${toHex(n, 1)}</td></tr>`;
+    host.innerHTML = html;
+  };
+  mk($("#hex-lookup-a"), 0, 7);
+  mk($("#hex-lookup-b"), 8, 15);
+})();
 
 /* ---------- ASCII ---------- */
 function binMarked(code) {
