@@ -250,6 +250,8 @@
   .char-card .hex{color:var(--teal); font-family:var(--mono); font-size:13px}
   .char-card .bin{font-family:var(--mono); font-size:13px; margin-top:4px; letter-spacing:.06em}
   .char-card .bin b{color:var(--accent-ink)}
+  .char-card.unicode{border-color:var(--accent); background:var(--accent-soft)}
+  .char-card.unicode .dec{color:var(--accent-ink)}
 
   details{margin-top:14px}
   summary{cursor:pointer; font-weight:700; color:var(--blue)}
@@ -499,6 +501,11 @@
     <h3>Type something — watch it turn into bytes</h3>
     <input type="text" id="ascii-in" maxlength="255" placeholder="Type here… try your name!" aria-label="Text to translate">
     <div class="char-cards" id="ascii-cards"></div>
+    <div id="uni-egg" class="tip" hidden>
+      <p style="margin-top:0">🎉 <b>You found a secret!</b> That character is not in ASCII — it's <b>Unicode</b>.</p>
+      <p>ASCII (from 1963!) only has 128 characters — just enough for English. But the world needed accents, Chinese, Arabic, emoji… so <b>Unicode</b> was invented: one giant numbered list with a number for <i>every</i> character in <i>every</i> language — more than 150,000 so far. A character's number is called its <b>code point</b> and is written in hex, like <code>U+1F600</code> for 😀.</p>
+      <p style="margin-bottom:0">And the bytes? <b>UTF-8</b> is the recipe that turns a code point into bytes: ASCII characters still take exactly <b>1 byte</b> (their old codes!), European accents take 2, and emoji take <b>4 bytes</b>. So remember: <b>Unicode gives the number, UTF-8 stores the number as bytes</b> — and every ASCII message is already valid UTF-8. That clever trick is why the whole internet uses it.</p>
+    </div>
     <details>
       <summary>Show the full ASCII letter table</summary>
       <div class="ascii-table-grid" id="ascii-table"></div>
@@ -852,18 +859,29 @@ function renderAsciiCards() {
   const txt = $("#ascii-in").value;
   const host = $("#ascii-cards");
   host.innerHTML = "";
+  let sawUnicode = false;
   for (const ch of txt) {
     const code = ch.codePointAt(0);
-    if (code > 127) continue;
     const card = document.createElement("div");
-    card.className = "char-card";
-    const disp = ch === " " ? "␣" : ch;
-    card.innerHTML =
-      `<div class="ch">${disp}</div>` +
-      `<div class="dec">dec ${code} · <span class="hex">0x${toHex(code)}</span></div>` +
-      `<div class="bin">${binMarked(code)}</div>`;
+    if (code > 127) {
+      sawUnicode = true;
+      const bytes = [...new TextEncoder().encode(ch)];
+      card.className = "char-card unicode";
+      card.innerHTML =
+        `<div class="ch">${ch}</div>` +
+        `<div class="dec">U+${code.toString(16).toUpperCase().padStart(4, "0")} · dec ${code}</div>` +
+        `<div class="bin">UTF-8: ${bytes.map(b => toHex(b)).join(" ")}<br>${bytes.length} byte${bytes.length > 1 ? "s" : ""}, not ASCII!</div>`;
+    } else {
+      card.className = "char-card";
+      const disp = ch === " " ? "␣" : ch;
+      card.innerHTML =
+        `<div class="ch">${disp}</div>` +
+        `<div class="dec">dec ${code} · <span class="hex">0x${toHex(code)}</span></div>` +
+        `<div class="bin">${binMarked(code)}</div>`;
+    }
     host.appendChild(card);
   }
+  $("#uni-egg").hidden = !sawUnicode;
 }
 $("#ascii-in").addEventListener("input", renderAsciiCards);
 $("#ascii-in").value = "Hi!";
