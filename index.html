@@ -236,8 +236,18 @@
   }
   .history .h-row{display:flex; gap:18px; justify-content:center; white-space:nowrap}
   .history .h-bin b{color:var(--accent-ink)}
+  .history .h-bin{min-width:8ch; text-align:center}
   .history .h-dec{color:var(--ink-soft); min-width:3ch; text-align:right}
   .history .h-hex{color:var(--teal); min-width:4ch}
+  .history-head{
+    display:flex; gap:18px; justify-content:center; margin-top:16px;
+    font-family:var(--mono); font-size:11px; color:var(--ink-soft);
+    text-transform:uppercase; letter-spacing:.07em; white-space:nowrap;
+  }
+  .history-head .h-bin{min-width:8ch; text-align:center}
+  .history-head .h-dec{min-width:3ch; text-align:right}
+  .history-head .h-hex{min-width:4ch}
+  .history-head + .history{margin-top:6px}
 
   /* ---------- ascii ---------- */
   .char-cards{display:flex; gap:10px; flex-wrap:wrap; margin-top:10px}
@@ -458,6 +468,7 @@
         <input type="range" id="ctr-speed" min="1" max="10" value="3">
       </div>
     </div>
+    <div class="history-head"><span class="h-bin">binary</span><span class="h-dec">dec</span><span class="h-hex">hex</span></div>
     <div class="history" id="ctr-history" aria-label="Counting history"></div>
     <div class="tip">👀 <b>Look at the history list:</b> read one column from top to bottom. The right-hand column goes 0,1,0,1,0,1… the next goes 0,0,1,1,0,0,1,1… Every column has its own drum-beat, each twice as slow.</div>
   </div>
@@ -487,7 +498,7 @@
       <div class="tbl-wrap"><table id="hex-lookup-a"></table></div>
       <div class="tbl-wrap"><table id="hex-lookup-b"></table></div>
     </div>
-    <div class="tip">💡 Hex numbers are often written with <b><code>0x</code></b> in front, like <code>0xFF</code> = 255. You've seen hex before: colour codes like <code>#FF8800</code> are three hex bytes — red, green, blue!</div>
+    <div class="tip">💡 Programmers put a tag in front of a number to say which system it's in: <b><code>0x</code></b> means hex (like <code>0xFF</code> = 255) and <b><code>0b</code></b> means binary (like <code>0b1111</code> = 15). Without a tag, <code>10</code> is confusing — is it ten, <code>0b10</code> (two), or <code>0x10</code> (sixteen)? The tag tells you! You've seen hex before, by the way: colour codes like <code>#FF8800</code> are three hex bytes — red, green, blue.</div>
   </div>
   <div class="next-row"><button class="btn" data-goto="ascii">Next: 4 · ASCII →</button></div>
 </section>
@@ -809,7 +820,7 @@ function counterTick() {
   const row = document.createElement("div");
   row.className = "h-row";
   const bin = toBin(ctrN).replace(/1/g, "<b>1</b>");
-  row.innerHTML = `<span class="h-bin">${bin}</span><span class="h-dec">${ctrN}</span><span class="h-hex">0x${toHex(ctrN)}</span>`;
+  row.innerHTML = `<span class="h-bin">${bin}</span><span class="h-dec">${ctrN}</span><span class="h-hex">${toHex(ctrN)}</span>`;
   histEl.appendChild(row);
   while (histEl.children.length > 64) histEl.removeChild(histEl.firstChild);
   histEl.scrollTop = histEl.scrollHeight;
