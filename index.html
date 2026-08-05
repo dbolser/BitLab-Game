@@ -868,16 +868,16 @@ function counterPaint() {
 }
 let soundOn = false, audioCtx = null;
 const BIT_FREQ = [1047, 784, 659, 523, 392, 330, 262, 196]; // exponent 0..7, units highest
-function blip(freq) {
+function blip(freq, dur = 0.2) {
   const t = audioCtx.currentTime;
   const o = audioCtx.createOscillator(), g = audioCtx.createGain();
   o.type = "square";
   o.frequency.value = freq;
   g.gain.setValueAtTime(0.18, t);
-  g.gain.exponentialRampToValueAtTime(0.0001, t + 0.2);
+  g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
   o.connect(g).connect(audioCtx.destination);
   o.start(t);
-  o.stop(t + 0.21);
+  o.stop(t + dur + 0.01);
 }
 $("#ctr-sound").addEventListener("click", () => {
   soundOn = !soundOn;
@@ -894,7 +894,7 @@ function counterTick() {
   ctrN = (ctrN + 1) & 255;
   if (soundOn && audioCtx) {
     const turnedOn = ctrN & ~prev;
-    for (let e = 0; e < 8; e++) if (turnedOn & (1 << e)) blip(BIT_FREQ[e]);
+    for (let e = 0; e < 8; e++) if (turnedOn & (1 << e)) blip(BIT_FREQ[e], 0.15 + e * 0.09);
   }
   counterPaint();
   const row = document.createElement("div");
