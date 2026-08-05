@@ -210,6 +210,11 @@
   .btn.ghost:hover{border-color:var(--teal); color:var(--teal)}
   .hex-extra{display:none}
   #panel-learn.show-hex .hex-extra{display:block}
+  .xor-label{
+    text-align:center; font-size:12px; font-weight:700; letter-spacing:.07em;
+    text-transform:uppercase; color:var(--ink-soft); margin-top:12px;
+  }
+  .xor-label + div .bit-grid{margin-top:4px}
   .btn.small{padding:6px 12px; font-size:13px}
   .btn:disabled{opacity:.45; cursor:default}
   input[type="text"], textarea{
@@ -474,6 +479,7 @@
       <button class="btn" id="ctr-play">▶ Play</button>
       <button class="btn secondary" id="ctr-step">+1 step</button>
       <button class="btn secondary" id="ctr-reset">Reset</button>
+      <button class="btn secondary" id="ctr-sound">🔇 Sound off</button>
       <div class="speed-wrap">
         <label for="ctr-speed">Speed</label>
         <input type="range" id="ctr-speed" min="1" max="10" value="3">
@@ -546,6 +552,10 @@
     <h3>🔒 Encode a message</h3>
     <textarea id="enc-in" maxlength="200" placeholder="Write your secret message…"></textarea>
     <div class="row">
+      <label for="enc-key" style="font-weight:700; font-size:14px">🔑 Secret key</label>
+      <input type="text" id="enc-key" maxlength="200" placeholder="empty = no lock — try BANANA" style="max-width:300px" autocomplete="off">
+    </div>
+    <div class="row">
       <label><input type="radio" name="enc-mode" value="bin" checked> Binary</label>
       <label><input type="radio" name="enc-mode" value="hex"> Hex</label>
       <button class="btn small" id="enc-copy">Copy code</button>
@@ -558,7 +568,30 @@
     <h3>🔓 Decode a message</h3>
     <p style="font-size:14.5px; color:var(--ink-soft)">Paste binary (groups of 8) or hex (pairs) — spaces optional. It auto-detects which one it is.</p>
     <textarea id="dec-in" placeholder="01001000 01001001  …or…  48 49"></textarea>
+    <div class="row">
+      <label for="dec-key" style="font-weight:700; font-size:14px">🔑 Secret key</label>
+      <input type="text" id="dec-key" maxlength="200" placeholder="must match the sender's key!" style="max-width:300px" autocomplete="off">
+    </div>
     <div class="out-box" id="dec-out">The secret message appears here…</div>
+  </div>
+
+  <div class="card">
+    <h3>⚡ How the lock works — XOR</h3>
+    <p>The lock uses an operation called <b>XOR</b> (say "ex-or"). It compares two bits and asks one question: <b>are they different?</b></p>
+    <div class="tbl-wrap"><table>
+      <tr><th class="mono">message bit</th><td class="mono">0</td><td class="mono">0</td><td class="mono">1</td><td class="mono">1</td></tr>
+      <tr><th class="mono">key bit</th><td class="mono">0</td><td class="mono">1</td><td class="mono">0</td><td class="mono">1</td></tr>
+      <tr><th class="mono">result</th><td class="mono hl-accent">0</td><td class="mono hl-accent">1</td><td class="mono hl-accent">1</td><td class="mono hl-accent">0</td></tr>
+    </table></div>
+    <p>Try it — flip any switch and watch the bottom row light up exactly where the two rows above <b>disagree</b>:</p>
+    <div class="xor-label">message byte</div>
+    <div id="xor-a"></div>
+    <div class="xor-label">key byte</div>
+    <div id="xor-b"></div>
+    <div class="xor-label">locked byte = message ⊕ key</div>
+    <div id="xor-r"></div>
+    <p>The magic: XOR with the <b>same key twice</b> brings the message back. Lock it: message ⊕ key. Unlock it: locked ⊕ key = message again. That's why you and your friend just need the same key.</p>
+    <div class="tip">🎖️ <b>The unbreakable code:</b> if your key is <b>random</b>, <b>as long as the message</b>, and <b>never used twice</b>, this becomes a <b>one-time pad</b> — the only cipher in the world that's mathematically impossible to crack. Real spies carried little pads of random keys and burned each page after one use!</div>
   </div>
 
   <div class="card">
@@ -635,16 +668,18 @@ function makeBitRow(host, count, onChange, opts = {}) {
     }
   };
 
-  addRow("bit-power", i => {
-    const d = document.createElement("div");
-    d.innerHTML = `2<sup>${count - 1 - i}</sup>`;
-    return d;
-  });
-  addRow("bit-place", i => {
-    const d = document.createElement("div");
-    d.textContent = 2 ** (count - 1 - i);
-    return d;
-  });
+  if (!opts.noLabels) {
+    addRow("bit-power", i => {
+      const d = document.createElement("div");
+      d.innerHTML = `2<sup>${count - 1 - i}</sup>`;
+      return d;
+    });
+    addRow("bit-place", i => {
+      const d = document.createElement("div");
+      d.textContent = 2 ** (count - 1 - i);
+      return d;
+    });
+  }
 
   const btns = [];
   addRow("bit-cell", i => {
@@ -831,8 +866,36 @@ function counterPaint() {
   $("#ctr-dec").textContent = ctrN;
   $("#ctr-hex").textContent = toHex(ctrN);
 }
+let soundOn = false, audioCtx = null;
+const BIT_FREQ = [1047, 784, 659, 523, 392, 330, 262, 196]; // exponent 0..7, units highest
+function blip(freq) {
+  const t = audioCtx.currentTime;
+  const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+  o.type = "square";
+  o.frequency.value = freq;
+  g.gain.setValueAtTime(0.05, t);
+  g.gain.exponentialRampToValueAtTime(0.0001, t + 0.15);
+  o.connect(g).connect(audioCtx.destination);
+  o.start(t);
+  o.stop(t + 0.16);
+}
+$("#ctr-sound").addEventListener("click", () => {
+  soundOn = !soundOn;
+  if (soundOn && !audioCtx) {
+    try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
+    catch { soundOn = false; }
+  }
+  if (audioCtx && audioCtx.state === "suspended") audioCtx.resume();
+  $("#ctr-sound").textContent = soundOn ? "🔊 Sound on" : "🔇 Sound off";
+  if (soundOn && audioCtx) blip(523);
+});
 function counterTick() {
+  const prev = ctrN;
   ctrN = (ctrN + 1) & 255;
+  if (soundOn && audioCtx) {
+    const turnedOn = ctrN & ~prev;
+    for (let e = 0; e < 8; e++) if (turnedOn & (1 << e)) blip(BIT_FREQ[e]);
+  }
   counterPaint();
   const row = document.createElement("div");
   row.className = "h-row";
@@ -933,16 +996,24 @@ renderAsciiCards();
 
 /* ---------- SECRET codes ---------- */
 function encMode() { return document.querySelector('input[name="enc-mode"]:checked').value; }
+const keyCodes = s => [...s].map(c => c.codePointAt(0)).filter(c => c <= 127);
+function xorWithKey(bytes, key) {
+  return key.length ? bytes.map((b, i) => b ^ key[i % key.length]) : bytes;
+}
 function renderEncode() {
   const txt = $("#enc-in").value;
   const out = $("#enc-out");
   if (!txt) { out.textContent = "Your coded message appears here…"; return; }
-  const codes = [...txt].map(ch => ch.codePointAt(0)).filter(c => c <= 127);
+  const codes = xorWithKey(
+    [...txt].map(ch => ch.codePointAt(0)).filter(c => c <= 127),
+    keyCodes($("#enc-key").value)
+  );
   out.textContent = encMode() === "bin"
     ? codes.map(c => toBin(c)).join(" ")
     : codes.map(c => toHex(c)).join(" ");
 }
 $("#enc-in").addEventListener("input", renderEncode);
+$("#enc-key").addEventListener("input", renderEncode);
 document.querySelectorAll('input[name="enc-mode"]').forEach(r => r.addEventListener("change", renderEncode));
 $("#enc-copy").addEventListener("click", async () => {
   const t = $("#enc-out").textContent;
@@ -955,7 +1026,7 @@ $("#enc-copy").addEventListener("click", async () => {
   setTimeout(() => $("#enc-copied").textContent = "", 1800);
 });
 
-$("#dec-in").addEventListener("input", () => {
+function renderDecode() {
   const raw = $("#dec-in").value.trim();
   const out = $("#dec-out");
   if (!raw) { out.textContent = "The secret message appears here…"; return; }
@@ -965,23 +1036,32 @@ $("#dec-in").addEventListener("input", () => {
     out.textContent = "🕵️ Caught you, agent! That's the First Mission — and the mission said NO pasting! Decode it by hand with the ASCII table. Here's a start: 01011001 = 64+16+8+1 = 89, and 89 is the letter… go look it up 😉";
     return;
   }
-  let text = "";
-  try {
-    if (/^[01]+$/.test(compact) && compact.length >= 8) {
-      for (let i = 0; i + 8 <= compact.length; i += 8)
-        text += String.fromCharCode(parseInt(compact.slice(i, i + 8), 2));
-    } else if (/^[0-9a-fA-F]+$/.test(compact) && compact.length >= 2) {
-      for (let i = 0; i + 2 <= compact.length; i += 2)
-        text += String.fromCharCode(parseInt(compact.slice(i, i + 2), 16));
-    } else {
-      out.textContent = "Hmm — that doesn't look like binary or hex yet. Binary needs only 0s and 1s (8 per letter); hex uses 0–9 and A–F (2 per letter).";
-      return;
-    }
-    out.textContent = "🔓 " + text;
-  } catch {
-    out.textContent = "Something went wrong decoding that — check the groups.";
+  const bytes = [];
+  if (/^[01]+$/.test(compact) && compact.length >= 8) {
+    for (let i = 0; i + 8 <= compact.length; i += 8)
+      bytes.push(parseInt(compact.slice(i, i + 8), 2));
+  } else if (/^[0-9a-fA-F]+$/.test(compact) && compact.length >= 2) {
+    for (let i = 0; i + 2 <= compact.length; i += 2)
+      bytes.push(parseInt(compact.slice(i, i + 2), 16));
+  } else {
+    out.textContent = "Hmm — that doesn't look like binary or hex yet. Binary needs only 0s and 1s (8 per letter); hex uses 0–9 and A–F (2 per letter).";
+    return;
   }
-});
+  const plain = xorWithKey(bytes, keyCodes($("#dec-key").value));
+  const text = plain.map(c => c >= 32 && c <= 126 ? String.fromCharCode(c) : "·").join("");
+  out.textContent = "🔓 " + text +
+    (text.includes("·") ? "   (those · dots mean strange bytes — wrong key, maybe?)" : "");
+}
+$("#dec-in").addEventListener("input", renderDecode);
+$("#dec-key").addEventListener("input", renderDecode);
+
+/* ---------- XOR demo ---------- */
+function syncXor() { xorR.set(xorA.value() ^ xorB.value()); }
+const xorA = makeBitRow($("#xor-a"), 8, syncXor, { noLabels: true });
+const xorB = makeBitRow($("#xor-b"), 8, syncXor, { noLabels: true });
+const xorR = makeBitRow($("#xor-r"), 8, null, { static: true, noLabels: true });
+xorA.set(72);  // 'H'
+xorB.set(42);
 
 /* ---------- GAME ---------- */
 const WORDS = ["BIT","CODE","GAME","ROBOT","NINJA","PIZZA","MAGIC","HELLO","POWER","BYTE","LASER","SPY"];
