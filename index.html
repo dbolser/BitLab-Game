@@ -337,6 +337,17 @@
 
   .next-row{display:flex; justify-content:flex-end}
 
+  footer{
+    max-width:920px; margin:0 auto; padding:0 20px 40px;
+    text-align:center; font-size:13.5px; color:var(--ink-soft);
+  }
+  footer a{color:var(--blue); font-weight:650}
+  .lamp-dot-sm{
+    display:inline-block; width:9px; height:9px; border-radius:50%;
+    background:var(--accent); box-shadow:var(--lamp-glow);
+    vertical-align:baseline; margin-right:4px;
+  }
+
   #pow2-table th, #pow2-table td{cursor:help}
   .pow-pop{
     position:absolute; z-index:10; display:none;
@@ -567,6 +578,12 @@
 </section>
 
 </main>
+
+<footer>
+  <span class="lamp-dot-sm"></span>
+  BitLab — made for a curious 11-year-old ·
+  <a href="https://github.com/dbolser/BitLab-Game" target="_blank" rel="noopener">view the code on GitHub</a>
+</footer>
 
 <script>
 "use strict";
