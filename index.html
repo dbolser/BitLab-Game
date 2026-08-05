@@ -873,11 +873,11 @@ function blip(freq) {
   const o = audioCtx.createOscillator(), g = audioCtx.createGain();
   o.type = "square";
   o.frequency.value = freq;
-  g.gain.setValueAtTime(0.05, t);
-  g.gain.exponentialRampToValueAtTime(0.0001, t + 0.15);
+  g.gain.setValueAtTime(0.18, t);
+  g.gain.exponentialRampToValueAtTime(0.0001, t + 0.2);
   o.connect(g).connect(audioCtx.destination);
   o.start(t);
-  o.stop(t + 0.16);
+  o.stop(t + 0.21);
 }
 $("#ctr-sound").addEventListener("click", () => {
   soundOn = !soundOn;
