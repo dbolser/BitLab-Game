@@ -1,3 +1,4 @@
+<meta charset="utf-8">
 <title>BitLab — Learn Binary</title>
 <style>
   :root{
@@ -316,6 +317,21 @@
     padding:1px 6px; font-size:.92em;
   }
 
+  .next-row{display:flex; justify-content:flex-end}
+
+  #pow2-table th, #pow2-table td{cursor:help}
+  .pow-pop{
+    position:absolute; z-index:10; display:none;
+    background:var(--panel); border:1.5px solid var(--line); border-radius:12px;
+    padding:10px 12px; box-shadow:0 8px 24px rgba(9,14,30,.25); text-align:center;
+    pointer-events:none;
+  }
+  .pow-pop.show{display:block}
+  .pow-pop .cap{
+    font-family:var(--mono); font-size:13px; margin-top:6px; color:var(--ink-soft);
+    font-variant-numeric:tabular-nums; white-space:nowrap;
+  }
+
   @media (prefers-reduced-motion: no-preference){
     .bit .lamp{transition:background .15s, box-shadow .25s}
     .tab, .btn, .level-card{transition:border-color .12s, background .12s}
@@ -383,14 +399,24 @@
         </table></div>
         <p style="font-family:var(--mono); font-size:14.5px; overflow-x:auto" id="cmp-bin-sum">00000000 = 0</p>
       </div>
+      <div style="grid-column:1/-1">
+        <h3>Hex — powers of 16</h3>
+        <p style="font-size:14.5px">Same trick a third time — each column is worth <b>16×</b> more. A whole byte fits in just two hex digits!</p>
+        <div class="tbl-wrap"><table>
+          <tr><th class="mono">16¹</th><th class="mono">16⁰</th></tr>
+          <tr><th>sixteens</th><th>units</th></tr>
+          <tr class="mono" id="cmp-hex-row"><td>0</td><td>0</td></tr>
+        </table></div>
+        <p style="font-family:var(--mono); font-size:14.5px; overflow-x:auto" id="cmp-hex-sum">00 = <b>0</b>×16 + <b>0</b>×1 = 0</p>
+      </div>
     </div>
     <div class="tip">💡 <b>Reading trick:</b> write the column values above the bits (128, 64, 32, 16, 8, 4, 2, 1), then just <b>add up the columns where the bit is 1</b>.</div>
   </div>
 
   <div class="card">
     <h3>Powers of 2 — worth memorising!</h3>
-    <p>These numbers appear everywhere in computers (ever noticed games and phones use 256, 512, 1024…?).</p>
-    <div class="tbl-wrap"><table>
+    <p>These numbers appear everywhere in computers (ever noticed games and phones use 256, 512, 1024…?). <b>Hover over a number</b> to see it as a square of dots!</p>
+    <div class="tbl-wrap"><table id="pow2-table">
       <tr>
         <th class="mono">2⁰</th><th class="mono">2¹</th><th class="mono">2²</th><th class="mono">2³</th><th class="mono">2⁴</th><th class="mono">2⁵</th><th class="mono">2⁶</th><th class="mono">2⁷</th><th class="mono">2⁸</th><th class="mono">2⁹</th><th class="mono">2¹⁰</th>
       </tr>
@@ -400,6 +426,7 @@
     </table></div>
     <p>With 8 bits you can make every number from <code>0</code> (all OFF) to <code>255</code> (all ON). That's why so many computer things stop at 255!</p>
   </div>
+  <div class="next-row"><button class="btn" data-goto="counter">Next: 2 · Counter →</button></div>
 </section>
 
 <!-- ============ COUNTER ============ -->
@@ -425,6 +452,7 @@
     <div class="history" id="ctr-history" aria-label="Counting history"></div>
     <div class="tip">👀 <b>Look at the history list:</b> read one column from top to bottom. The right-hand column goes 0,1,0,1,0,1… the next goes 0,0,1,1,0,0,1,1… Every column has its own drum-beat, each twice as slow.</div>
   </div>
+  <div class="next-row"><button class="btn" data-goto="hex">Next: 3 · Hex →</button></div>
 </section>
 
 <!-- ============ HEX ============ -->
@@ -453,6 +481,7 @@
     </table></div>
     <div class="tip">💡 Hex numbers are often written with <b><code>0x</code></b> in front, like <code>0xFF</code> = 255. You've seen hex before: colour codes like <code>#FF8800</code> are three hex bytes — red, green, blue!</div>
   </div>
+  <div class="next-row"><button class="btn" data-goto="ascii">Next: 4 · ASCII →</button></div>
 </section>
 
 <!-- ============ ASCII ============ -->
@@ -470,6 +499,7 @@
     </details>
     <div class="tip">🔎 <b>Spot the pattern:</b> capital <code>A</code> is <code>01000001</code> and small <code>a</code> is <code>01100001</code>. Only <b>one bit</b> is different (the 32s column)! That single bit is the difference between BIG and small letters.</div>
   </div>
+  <div class="next-row"><button class="btn" data-goto="secret">Next: 5 · Secret codes →</button></div>
 </section>
 
 <!-- ============ SECRET ============ -->
@@ -501,6 +531,7 @@
     <p>Decode this message by hand with the ASCII table (no pasting — that's cheating!):</p>
     <div class="out-box">01011001 01001111 01010101 00100000 01010010 01001111 01000011 01001011</div>
   </div>
+  <div class="next-row"><button class="btn" data-goto="game">Next: 🎮 Play →</button></div>
 </section>
 
 <!-- ============ GAME ============ -->
@@ -527,6 +558,13 @@ document.querySelectorAll(".tab").forEach(tab => {
     document.querySelectorAll("main > section").forEach(s => s.hidden = true);
     $("#panel-" + tab.dataset.tab).hidden = false;
     if (tab.dataset.tab !== "counter") counterPause();
+  });
+});
+document.querySelectorAll("[data-goto]").forEach(btn => {
+  btn.addEventListener("click", () => {
+    document.querySelector(`.tab[data-tab="${btn.dataset.goto}"]`).click();
+    const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+    scrollTo({ top: 0, behavior: reduce ? "auto" : "smooth" });
   });
 });
 
@@ -636,6 +674,7 @@ function asciiInfo(v) {
 }
 const cmpDecCells = document.querySelectorAll("#cmp-dec-row td");
 const cmpBinCells = document.querySelectorAll("#cmp-bin-row td");
+const cmpHexCells = document.querySelectorAll("#cmp-hex-row td");
 function updateCompare(v, bits) {
   const digits = [Math.floor(v / 100), Math.floor(v / 10) % 10, v % 10];
   digits.forEach((d, i) => {
@@ -650,6 +689,14 @@ function updateCompare(v, bits) {
   });
   $("#cmp-bin-sum").innerHTML =
     `${toBin(v)} = ` + bits.map((b, i) => `<b>${b}</b>×${2 ** (7 - i)}`).join(" + ") + ` = ${v}`;
+  const hi = v >> 4, lo = v & 15;
+  [hi, lo].forEach((d, i) => {
+    cmpHexCells[i].textContent = toHex(d, 1);
+    cmpHexCells[i].classList.toggle("hl-teal", d > 0);
+  });
+  let hexSum = `${toHex(v)} = <b>${toHex(hi, 1)}</b>×16 + <b>${toHex(lo, 1)}</b>×1`;
+  if (hi > 9 || lo > 9) hexSum += ` = ${hi}×16 + ${lo}×1`;
+  $("#cmp-hex-sum").innerHTML = hexSum + ` = ${v}`;
 }
 const hero = makeBitRow($("#hero-bits"), 8, api => {
   const v = api.value();
@@ -669,6 +716,55 @@ $("#hero-minus").addEventListener("click", () => hero.set((hero.value() + 255) &
 $("#hero-plus").addEventListener("click", () => hero.set((hero.value() + 1) & 255));
 $("#hero-max").addEventListener("click", () => hero.set(255));
 hero.set(0);
+
+/* ---------- powers-of-2 hover popup ---------- */
+(function powersPopup() {
+  const table = $("#pow2-table");
+  if (!table) return;
+  const pop = document.createElement("div");
+  pop.className = "pow-pop";
+  const canvas = document.createElement("canvas");
+  const cap = document.createElement("div");
+  cap.className = "cap";
+  pop.appendChild(canvas);
+  pop.appendChild(cap);
+  document.body.appendChild(pop);
+
+  function show(cellEl, exp) {
+    const cols = 2 ** Math.ceil(exp / 2), rows = 2 ** Math.floor(exp / 2);
+    const cell = Math.max(6, Math.min(20, Math.floor(200 / cols)));
+    canvas.width = cols * cell;
+    canvas.height = rows * cell;
+    const ctx = canvas.getContext("2d");
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue("--accent").trim() || "#FFB020";
+    const r = cell * 0.36;
+    for (let y = 0; y < rows; y++)
+      for (let x = 0; x < cols; x++) {
+        ctx.beginPath();
+        ctx.arc(x * cell + cell / 2, y * cell + cell / 2, r, 0, 7);
+        ctx.fill();
+      }
+    const n = 2 ** exp;
+    cap.textContent = exp === 0 ? "1 — just one dot" :
+      rows === cols ? `${n} = ${cols} × ${rows} — a perfect square!`
+                    : `${n} = ${cols} × ${rows} — two squares side by side`;
+    pop.classList.add("show");
+    const tr = cellEl.getBoundingClientRect();
+    let left = scrollX + tr.left + tr.width / 2 - pop.offsetWidth / 2;
+    left = Math.max(8, Math.min(left, scrollX + innerWidth - pop.offsetWidth - 8));
+    let top = scrollY + tr.top - pop.offsetHeight - 10;
+    if (top < scrollY + 8) top = scrollY + tr.bottom + 10;
+    pop.style.left = left + "px";
+    pop.style.top = top + "px";
+  }
+  table.querySelectorAll("tr").forEach(row => {
+    [...row.children].forEach((cellEl, exp) => {
+      cellEl.addEventListener("mouseenter", () => show(cellEl, exp));
+      cellEl.addEventListener("mouseleave", () => pop.classList.remove("show"));
+    });
+  });
+})();
 
 /* ---------- COUNTER ---------- */
 const ctr = makeBitRow($("#counter-bits"), 8, null, { static: true, flipLabels: true });
